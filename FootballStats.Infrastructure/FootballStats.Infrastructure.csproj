@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FootballStats.Application\FootballStats.Application.csproj" />
+      <ProjectReference Include="..\FootballStats.Domain\FootballStats.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CsvHelper" Version="33.1.0" />
+      <PackageReference Include="Mapster" Version="7.4.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+      <PackageReference Include="ServiceStack.OrmLite" Version="8.8.0" />
+      <PackageReference Include="ServiceStack.OrmLite.SqlServer.Data" Version="8.8.0" />
+    </ItemGroup>
+
+</Project>

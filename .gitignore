@@ -1,0 +1,8 @@
+bin/
+obj/
+**/Properties/
+.idea/
+.idea.FootballStats/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/

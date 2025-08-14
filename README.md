@@ -1,0 +1,172 @@
+# FootballStats - Football Statistics
+
+Web application for managing football match statistics with user authentication system.
+
+## Description
+
+The project consists of two applications:
+- **ASP.NET MVC** - web interface for users
+- **ASP.NET Web API** - REST API for integration
+
+## Architecture
+
+Clean Architecture with layered approach:
+- **Domain Layer** - entities and business rules
+- **Application Layer** - business logic and services
+- **Infrastructure Layer** - data access and external services
+- **Presentation Layer** - MVC and Web API
+
+## Technologies
+
+- **.NET 8.0**
+- **ASP.NET Core MVC & Web API**
+- **SQL Server** with ServiceStack.OrmLite
+- **FluentValidation** for data validation
+- **Bootstrap** for UI
+- **Mapster** DTO ↔ Entity mapping
+- **xUnit, Moq, Shouldly** for testing
+- **CSV import/export** implemented using atomic transactions, streaming file reads, and batch processing for improved performance
+
+## Installation Guide
+
+### Prerequisites
+- .NET 8.0 SDK
+- SQL Server (LocalDB or full version)
+- Visual Studio 2022 or VS Code or Rider
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/your-username/FootballStats.git
+cd FootballStats
+```
+
+### 2. Create Database
+1. Open SQL Server Management Studio
+2. Execute SQL script from `Database/CreateDatabase.sql`
+3. Or use LocalDB for development
+
+### 3. Configure Connection String
+Update connection string in:
+- `FootballStats.WebMvc/appsettings.Development.json`
+- `FootballStats.WebApi/appsettings.Development.json`
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=FootballStatsDb;Trusted_Connection=True;Encrypt=False;"
+  }
+}
+```
+
+### 4. Run Applications
+
+#### MVC Application
+```bash
+cd FootballStats.WebMvc
+dotnet run
+```
+Access: `https://localhost:5001`
+
+#### Web API Application
+```bash
+cd FootballStats.WebApi
+dotnet run
+```
+
+## Authentication
+
+### Registration
+- Navigate to `/Account/Register`
+- Fill in: Name, Email, Login, Password
+
+### Login
+- Navigate to `/Account/Login`
+- Use Email and Password
+- You will be automatically switched to /Matches
+- Session timeout: 30 minutes
+
+## Features
+
+### MVC Application
+- User registration and authentication
+- View match statistics (50 matches per page)
+- Filter matches by team name and date range
+- Session-based authorization
+
+### Web API
+- `GET /api/matches` - Get all matches with filtering
+- `GET /api/matches/{id}` - Get specific match
+- `POST /api/matches` - Add new match
+- `POST /api/matches/import` - Import matches from CSV
+- `GET /api/matches/export` - Export matches to CSV
+
+### Import Sample Data
+To test the API quickly, you can import sample matches:
+
+- [matches_50.csv](../../Downloads/matches_50.csv) - CSV file with data for import to db
+- Go to `/api/matches/import` (POST)
+- Upload the `matches_50.csv` file
+- After import, use `GET /api/matches` to see the data
+
+## Database Schema
+
+### Users Table
+```sql
+CREATE TABLE Users (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    Login NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL
+);
+```
+
+### Matches Table
+```sql
+CREATE TABLE Matches (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Date DATETIME2 NOT NULL,
+    Team1 NVARCHAR(100) NOT NULL,
+    Team2 NVARCHAR(100) NOT NULL,
+    Score NVARCHAR(10) NOT NULL
+);
+```
+
+---
+
+**SQL Script for Database Creation:**
+
+```sql
+-- Create Database
+CREATE DATABASE FootballStatsDb;
+GO
+
+USE FootballStatsDb;
+GO
+
+-- Create Users Table
+CREATE TABLE Users (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    Login NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL
+);
+GO
+
+-- Create Matches Table
+CREATE TABLE Matches (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Date DATETIME2 NOT NULL,
+    Team1 NVARCHAR(100) NOT NULL,
+    Team2 NVARCHAR(100) NOT NULL,
+    Score NVARCHAR(10) NOT NULL
+);
+GO
+
+-- Create Indexes for Performance
+CREATE INDEX IX_Matches_Date ON Matches(Date);
+CREATE INDEX IX_Matches_Team1 ON Matches(Team1);
+CREATE INDEX IX_Matches_Team2 ON Matches(Team2);
+GO
+``` 

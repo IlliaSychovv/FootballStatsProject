@@ -1,0 +1,8 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=18db1169_002D3529_002D4e86_002Dad79_002D15bbcc1dba8e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="MatchServiceTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::60CCCAB4-1591-4F65-AA72-35A62A92C644::net8.0::FootballStats.Test.MatchServiceTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::60CCCAB4-1591-4F65-AA72-35A62A92C644::net8.0::FootballStats.Test.UserServiceTest.Test1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::60CCCAB4-1591-4F65-AA72-35A62A92C644::net8.0::FootballStats.Test.UserServiceTest.Test2&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
