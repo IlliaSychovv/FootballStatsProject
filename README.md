@@ -103,9 +103,9 @@ dotnet run
 ### Import Sample Data
 To test the API quickly, you can import sample matches:
 
-- [matches_50.csv](../../Downloads/matches_50.csv) - CSV file with data for import to db
+- [Download CSV](data.csv)
 - Go to `/api/matches/import` (POST)
-- Upload the `matches_50.csv` file
+- Upload the file
 - After import, use `GET /api/matches` to see the data
 
 ## Database Schema
