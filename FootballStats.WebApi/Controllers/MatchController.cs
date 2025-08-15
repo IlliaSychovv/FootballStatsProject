@@ -1,5 +1,4 @@
 using FootballStats.Application.DTO;
-using FootballStats.Application.Interfaces;
 using FootballStats.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,14 +9,14 @@ namespace FootballStats.WebApi.Controllers;
 public class MatchController : ControllerBase
 {
     private readonly IMatchService _matchService;
-    private readonly IDataImportService _dataImportService;
-    private readonly IDataExportService _exportService;
+    private readonly IExportService _exportService;
+    private readonly IImportService _importService;
 
-    public MatchController(IMatchService matchService, IDataImportService dataImportService, IDataExportService exportService)
+    public MatchController(IMatchService matchService, IExportService exportService, IImportService importService)
     {
         _matchService = matchService;
-        _dataImportService = dataImportService;
         _exportService = exportService;
+        _importService = importService;
     }
 
     [HttpGet("{id}")]
@@ -49,7 +48,7 @@ public class MatchController : ControllerBase
     [HttpPost("import")]
     public async Task<IActionResult> Import(IFormFile file)
     {
-        await _dataImportService.ImportMatches(file.OpenReadStream());
+        await _importService.ImportFromCsvAsync(file.OpenReadStream());
         return Ok("Imported!");
     }
 
@@ -58,9 +57,9 @@ public class MatchController : ControllerBase
     public async Task<IActionResult> ExportMatches()
     {
         var stream = new MemoryStream();
-        await _exportService.ExportMatches(stream);
+        await _exportService.ExportToCsvAsync(stream);
         stream.Position = 0;
-
+        
         return File(stream, "text/csv", "matches_export.csv");
     }
 }

@@ -37,7 +37,7 @@ public class ImportService : IImportService
                 .Select(m => (m.Date, m.Team1, m.Team2))
                 .ToHashSet();
 
-            int currentId = 250;
+            int currentId = 500;
 
             await foreach (var csvMatch in _reader.ReadAsync(csvStream))
             {
