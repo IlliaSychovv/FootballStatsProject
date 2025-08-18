@@ -48,10 +48,10 @@ using (var scope = app.Services.CreateAsyncScope())
     var context = scope.ServiceProvider.GetRequiredService<DbContext>();
     using var db = context.Open();
     
-    db.CreateTableIfNotExists<Match>();
-    //db.DropAndCreateTable<Match>();
-    db.CreateTableIfNotExists<User>();
-    //db.DropAndCreateTable<User>();
+    //db.CreateTableIfNotExists<Match>();
+    db.DropAndCreateTable<Match>();
+    //db.CreateTableIfNotExists<User>();
+    db.DropAndCreateTable<User>();
 }
 
 if (app.Environment.IsDevelopment())

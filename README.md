@@ -41,9 +41,8 @@ cd FootballStats
 ```
 
 ### 2. Create Database
-1. Open SQL Server Management Studio
-2. Execute SQL script from `Database/CreateDatabase.sql`
-3. Or use LocalDB for development
+1. Docker Compose
+2. Or use LocalDB for development
 
 ### 3. Configure Connection String
 Update connection string in:
@@ -83,7 +82,7 @@ dotnet run
 - Navigate to `/Account/Login`
 - Use Email and Password
 - You will be automatically switched to /Matches
-- Session timeout: 30 minutes
+- Сookies timeout: 30 minutes
 
 ## Features
 
