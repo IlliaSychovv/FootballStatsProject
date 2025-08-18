@@ -110,63 +110,75 @@ To test the API quickly, you can import sample matches:
 
 ## Database Schema
 
-### Users Table
-```sql
-CREATE TABLE Users (
-    Id UNIQUEIDENTIFIER PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(100) NOT NULL UNIQUE,
-    Login NVARCHAR(50) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL
-);
+When you first launch the application, it automatically creates all the necessary tables in the database
+
+## Docker Setup
+
+### Prerequisites
+- Docker Desktop
+- Docker Compose
+
+### Quick Start with Docker
+
+1. **Update connection strings**
+
+Update both files with the Docker connection string:
+
+**`FootballStats.WebMvc/appsettings.Development.json`:**
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost,1433;Database=FootballStatsDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Encrypt=false;"
+  }
+}
 ```
 
-### Matches Table
-```sql
-CREATE TABLE Matches (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Date DATETIME2 NOT NULL,
-    Team1 NVARCHAR(100) NOT NULL,
-    Team2 NVARCHAR(100) NOT NULL,
-    Score NVARCHAR(10) NOT NULL
-);
+**`FootballStats.WebApi/appsettings.Development.json`:**
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost,1433;Database=FootballStatsDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;Encrypt=false;"
+  }
+}
 ```
 
----
+2. **Run the applications**
+```bash
+# MVC Application
+cd FootballStats.WebMvc
+dotnet run
 
-**SQL Script for Database Creation:**
+# Web API (in another terminal)
+cd FootballStats.WebApi
+dotnet run
+```
 
-```sql
--- Create Database
-CREATE DATABASE FootballStatsDb;
-GO
+### Docker Commands
+```bash
+# Start containers
+docker-compose up -d
 
-USE FootballStatsDb;
-GO
+docker-compose down
 
--- Create Users Table
-CREATE TABLE Users (
-    Id UNIQUEIDENTIFIER PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(100) NOT NULL UNIQUE,
-    Login NVARCHAR(50) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL
-);
-GO
+docker-compose logs sqlserver
 
--- Create Matches Table
-CREATE TABLE Matches (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Date DATETIME2 NOT NULL,
-    Team1 NVARCHAR(100) NOT NULL,
-    Team2 NVARCHAR(100) NOT NULL,
-    Score NVARCHAR(10) NOT NULL
-);
-GO
+docker-compose down -v
+```
 
--- Create Indexes for Performance
-CREATE INDEX IX_Matches_Date ON Matches(Date);
-CREATE INDEX IX_Matches_Team1 ON Matches(Team1);
-CREATE INDEX IX_Matches_Team2 ON Matches(Team2);
-GO
-``` 
+### Default Credentials
+- **Server**: localhost,1433
+- **Database**: FootballStatsDb
+- **Username**: sa
+- **Password**: YourStrong@Passw0rd

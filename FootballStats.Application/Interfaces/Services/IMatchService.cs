@@ -1,12 +1,14 @@
 using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Authorization;
+using FootballStats.Application.DTO.Match;
 
 namespace FootballStats.Application.Interfaces.Services;
 
 public interface IMatchService
 {
-    Task<MatchDto> GetMatchByIdAsync(int matchId);
-    Task<MatchDto> AddMatchAsync(MatchDto matchDto);
-    Task<IReadOnlyList<MatchDto>> GetMatchesForMVC(string? teamName, DateTime? fromDate, DateTime? toDate);
-    Task<PagedResponse<MatchDto>> GetAsync(string? teamName = null, DateTime? fromDate = null, DateTime? toDate = null, 
+    Task<MatchDto> GetMatchByIdAsync(Guid matchId); 
+    Task<MatchDto> AddMatchAsync(CreateMatchDto createMatchDto); 
+    Task<PagedResponse<MatchDto>> GetAsync(string? teamName1 = null, string? teamName2 = null, DateTime? fromDate = null, DateTime? toDate = null, 
         int pageNumber = 1, int pageSize = 50);
+    Task<IReadOnlyList<string>> GetTeamNamesAsync();
 }

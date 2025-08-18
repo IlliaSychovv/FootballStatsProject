@@ -1,6 +1,6 @@
 using System.Globalization;
 using CsvHelper;
-using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Match;
 using FootballStats.Application.Interfaces.Services;
 using FootballStats.Infrastructure.Data;
 using FootballStats.Domain.Entity;

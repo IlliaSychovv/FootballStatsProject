@@ -1,5 +1,4 @@
-using System.Text.RegularExpressions;
-using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Match;
 
 namespace FootballStats.Application.Interfaces;
 

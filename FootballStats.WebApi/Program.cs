@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateMatchValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
+builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
 builder.Services.AddSingleton<DbContext>(provider =>
 {
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+builder.Services.AddScoped<IUserAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 
@@ -47,7 +49,9 @@ using (var scope = app.Services.CreateAsyncScope())
     using var db = context.Open();
     
     db.CreateTableIfNotExists<Match>();
+    //db.DropAndCreateTable<Match>();
     db.CreateTableIfNotExists<User>();
+    //db.DropAndCreateTable<User>();
 }
 
 if (app.Environment.IsDevelopment())

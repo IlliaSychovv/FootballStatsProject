@@ -108,5 +108,4 @@ public class UserServiceTest
         _mockUserRepository.Verify(x => x.GetUserByEmailAsync(It.IsAny<string>()), Times.Once);
         _mockPasswordHasherService.Verify(x => x.VerifyPassword(dto.Password, user.PasswordHash), Times.Once);
     }
-
 }

@@ -36,14 +36,19 @@ public class ImportService : IImportService
             var existingMatches = (await db.SelectAsync<Match>())
                 .Select(m => (m.Date, m.Team1, m.Team2))
                 .ToHashSet();
-
-            int currentId = 500;
-
+            
             await foreach (var csvMatch in _reader.ReadAsync(csvStream))
             {
                 if (csvMatch == null || string.IsNullOrWhiteSpace(csvMatch.Team1) || string.IsNullOrWhiteSpace(csvMatch.Team2))
                 {
                     _logger.LogWarning("Skipping invalid CSV record");
+                    continue;
+                }
+
+                if (csvMatch.Date > DateTime.UtcNow)
+                {
+                    _logger.LogInformation("Skipping match with future date {Date}, {Team1}, {Team2}",
+                        csvMatch.Date, csvMatch.Team1, csvMatch.Team2);
                     continue;
                 }
 
@@ -55,8 +60,8 @@ public class ImportService : IImportService
                 }
 
                 batch.Add(new Match
-                {
-                    Id = currentId++,
+                { 
+                    Id = Guid.NewGuid(),
                     Date = csvMatch.Date,
                     Team1 = csvMatch.Team1,
                     Team2 = csvMatch.Team2,

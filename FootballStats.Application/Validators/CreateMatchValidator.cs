@@ -1,5 +1,5 @@
 using FluentValidation;
-using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Match;
 
 namespace FootballStats.Application.Validators;
 
@@ -7,10 +7,6 @@ public class CreateMatchValidator : AbstractValidator<MatchDto>
 {
     public CreateMatchValidator()
     {
-        RuleFor(m => m.Id)
-            .NotNull().WithMessage("Id cannot be null")
-            .NotEmpty().WithMessage("Id cannot be empty");
-        
         RuleFor(m => m.Date)
             .NotEmpty().WithMessage("Match date is required.")
             .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Match date cannot be in the future.");

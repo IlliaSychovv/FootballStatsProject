@@ -1,7 +1,7 @@
 using System.Globalization;
 using CsvHelper.Configuration;
 using CsvHelper;
-using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Match;
 using FootballStats.Application.Interfaces;
 
 namespace FootballStats.Infrastructure.Services;

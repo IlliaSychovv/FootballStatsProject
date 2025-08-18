@@ -1,4 +1,5 @@
 using FootballStats.Application.DTO;
+using FootballStats.Application.DTO.Match;
 using FootballStats.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,27 +21,28 @@ public class MatchController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetMatch(int id)
+    public async Task<IActionResult> GetMatch(Guid id)
     {
         var match = await _matchService.GetMatchByIdAsync(id);
         return Ok(match);
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddMatch([FromBody] MatchDto dto)
+    public async Task<IActionResult> AddMatch([FromBody] CreateMatchDto dto)
     {
         var match = await _matchService.AddMatchAsync(dto);
-        return CreatedAtAction(nameof(GetMatch), new { id = dto.Id }, dto);
+        return Created(string.Empty, match); 
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResponse<MatchDto>>> GetAllMatches([FromQuery] string? teamName = null,
+    public async Task<ActionResult<PagedResponse<MatchDto>>> GetAllMatches([FromQuery] string? teamName1 = null,
+        [FromQuery] string? teamName2 = null,
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 50)
     {
-        var matches = await _matchService.GetAsync(teamName, fromDate, toDate, pageNumber, pageSize);
+        var matches = await _matchService.GetAsync(teamName1, teamName2, fromDate, toDate, pageNumber, pageSize);
         
         return Ok(matches);
     }

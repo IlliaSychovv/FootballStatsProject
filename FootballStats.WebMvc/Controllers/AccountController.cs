@@ -7,10 +7,12 @@ namespace FootballStats.WebMvc.Controllers;
 public class AccountController : Controller
 {
     private readonly IUserService _userService;
+    private readonly IUserAuthenticationService _authenticationService;
 
-    public AccountController(IUserService userService)
+    public AccountController(IUserService userService, IUserAuthenticationService authenticationService)
     {
         _userService = userService;
+        _authenticationService = authenticationService;
     }
     
     public IActionResult Register()
@@ -39,21 +41,13 @@ public class AccountController : Controller
         if (!ModelState.IsValid) 
             return View(model);
         
-        var user = await _userService.GetUserLoginAsync(model);
-        if (user == null)
+        var login = await _authenticationService.SignInAsync(model);
+        if (!login)
         {
-            ModelState.AddModelError("", "Incorrect email or password");
+            ModelState.AddModelError(string.Empty, "Invalid login attempt");
             return View(model);
         }
         
-        HttpContext.Session.SetString("Id", user.Id.ToString()); 
-        
         return RedirectToAction("Index", "Matches");
-    }
-    
-    public IActionResult Logout()
-    {
-        HttpContext.Session.Remove("UserLogin");
-        return RedirectToAction("Login");
     }
 }

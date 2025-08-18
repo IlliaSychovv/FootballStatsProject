@@ -26,14 +26,14 @@ public class UserService : IUserService
         
         await _userRepository.AddUserAsync(user);
     }
-
+    
     public async Task<UserDto> GetUserLoginAsync(LoginUserDto dto)
     { 
         var user = await _userRepository.GetUserByEmailAsync(dto.Email);
-
+    
         bool isValid = _passwordHasherService.VerifyPassword(dto.Password, user.PasswordHash);
         if (!isValid) return null;
-
+    
         return user.Adapt<UserDto>();
     }
 }

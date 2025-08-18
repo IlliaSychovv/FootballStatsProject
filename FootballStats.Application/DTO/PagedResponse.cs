@@ -1,6 +1,8 @@
+using FootballStats.Application.DTO.Match;
+
 namespace FootballStats.Application.DTO;
 
-public record PagedResponse<MatchDto>
+public record PagedResponse<T>
 {
     public List<MatchDto> Items { get; set; }
     public int CurrentPage { get; set; }

@@ -1,4 +1,4 @@
-namespace FootballStats.Application.DTO;
+namespace FootballStats.Application.DTO.Match;
 
 public record MatchExportDto
 {

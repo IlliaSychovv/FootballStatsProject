@@ -19,11 +19,11 @@ public class UserRepository : IUserRepository
         using var db = _context.Open();
         await db.InsertAsync(user);
     }
-
-    public async Task<User> GetUserByLoginAsync(string login)
+    
+    public async Task<User> GetUserByLoginAsync(string email)
     {
         using var db = _context.Open();
-        return await db.SingleAsync<User>(u => u.Login == login);
+        return await db.SingleAsync<User>(u => u.Email == email);
     }
 
     public async Task<User> GetUserByEmailAsync(string email)
@@ -32,9 +32,9 @@ public class UserRepository : IUserRepository
         return await db.SingleAsync<User>(u => u.Email == email);
     }
 
-    public async Task<bool> IsUserExistAsync(string login)
+    public async Task<bool> IsUserExistAsync(string email)
     {
         using var db = _context.Open();
-        return await db.ExistsAsync<User>(u => u.Login == login);
+        return await db.ExistsAsync<User>(u => u.Email == email);
     }
 }
