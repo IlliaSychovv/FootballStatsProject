@@ -5,13 +5,12 @@ using FootballStats.Application.Interfaces.Repositories;
 using FootballStats.Application.Interfaces.Services;
 using FootballStats.Application.Services;
 using FootballStats.Application.Validators;
-using FootballStats.Domain.Entity;
 using FootballStats.Infrastructure.Data;
 using FootballStats.Infrastructure.Repositories;
 using FootballStats.Infrastructure.Services;
 using FootballStats.WebApi.Middleware;
 using Microsoft.AspNetCore.Diagnostics;
-using ServiceStack.OrmLite;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,12 +23,9 @@ builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddSingleton<IExceptionHandler, GlobalExceptionHandler>();
-builder.Services.AddSingleton<DbContext>(provider =>
-{
-    var configuration = provider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetConnectionString("DefaultConnection");
-    return new DbContext(connectionString);
-});
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IMatchService, MatchService>();
@@ -42,17 +38,6 @@ builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 builder.Services.AddScoped<IUserAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateAsyncScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<DbContext>();
-    using var db = context.Open();
-    
-    //db.CreateTableIfNotExists<Match>();
-    db.DropAndCreateTable<Match>();
-    //db.CreateTableIfNotExists<User>();
-    db.DropAndCreateTable<User>();
-}
 
 if (app.Environment.IsDevelopment())
 {

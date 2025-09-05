@@ -14,7 +14,13 @@
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.1.0" />
       <PackageReference Include="Mapster" Version="7.4.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.18" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.18">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
       <PackageReference Include="ServiceStack.OrmLite" Version="8.8.0" />
       <PackageReference Include="ServiceStack.OrmLite.SqlServer.Data" Version="8.8.0" />
     </ItemGroup>

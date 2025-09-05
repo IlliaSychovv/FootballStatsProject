@@ -6,7 +6,9 @@ using FootballStats.Application.Interfaces.Services;
 using FootballStats.Application.Services;
 using FootballStats.Application.Validators;
 using FootballStats.Infrastructure.Repositories;
+using FootballStats.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,11 +30,8 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginUserValidator>();
 
-builder.Services.AddScoped<FootballStats.Infrastructure.Data.DbContext>(sp =>
-{ 
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    return new FootballStats.Infrastructure.Data.DbContext(connectionString);
-});
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IMatchService, MatchService>();

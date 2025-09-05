@@ -3,92 +3,107 @@ using FootballStats.Application.Interfaces.Services;
 using FootballStats.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 using FootballStats.Domain.Entity;
-using ServiceStack.OrmLite;
+using Microsoft.EntityFrameworkCore;
 
 namespace FootballStats.Infrastructure.Services;
 
 public class ImportService : IImportService
 {
     private readonly IMatchCsvReader _reader;
-    private readonly DbContext _context;
+    private readonly AppDbContext _dbContexts;
     private readonly ILogger<ImportService> _logger;
 
     public ImportService(
         IMatchCsvReader reader,
-        DbContext context,
+        AppDbContext dbContexts,
         ILogger<ImportService> logger)
     {
         _reader = reader;
-        _context = context;
+        _dbContexts = dbContexts;
         _logger = logger;
     }
 
-    public async Task ImportFromCsvAsync(Stream csvStream)
+    public async Task ImportFromCsvAsync(Stream csvStream, CancellationToken token = default)
     {
         const int batchSize = 100;
         var batch = new List<Match>();
-
-        using var db = _context.Open();
-        using var transaction = db.OpenTransaction();
-
+        
+        var existingMatches = new HashSet<(DateTime Date, string Team1, string Team2)>();
+        
+        await using var transaction = await _dbContexts.Database.BeginTransactionAsync(token);
+        
         try
         {
-            var existingMatches = (await db.SelectAsync<Match>())
-                .Select(m => (m.Date, m.Team1, m.Team2))
-                .ToHashSet();
-            
-            await foreach (var csvMatch in _reader.ReadAsync(csvStream))
+            await foreach (var csvMatch in _reader.ReadAsync(csvStream).WithCancellation(token))
             {
                 if (csvMatch == null || string.IsNullOrWhiteSpace(csvMatch.Team1) || string.IsNullOrWhiteSpace(csvMatch.Team2))
                 {
-                    _logger.LogWarning("Skipping invalid CSV record");
+                    _logger.LogWarning("Skipping import because CSV file is empty or null");
                     continue;
                 }
+                
+                var matchDateUtc = DateTime.SpecifyKind(csvMatch.Date, DateTimeKind.Utc);
 
-                if (csvMatch.Date > DateTime.UtcNow)
+                if (matchDateUtc > DateTime.UtcNow)
                 {
                     _logger.LogInformation("Skipping match with future date {Date}, {Team1}, {Team2}",
-                        csvMatch.Date, csvMatch.Team1, csvMatch.Team2);
+                        matchDateUtc, csvMatch.Team1, csvMatch.Team2);    
                     continue;
                 }
 
-                if (existingMatches.Contains((csvMatch.Date, csvMatch.Team1, csvMatch.Team2)))
+                if (existingMatches.Contains((matchDateUtc, csvMatch.Team1, csvMatch.Team2)))
                 {
-                    _logger.LogInformation("Skipping duplicate match: {Date} {Team1} vs {Team2}",
-                        csvMatch.Date, csvMatch.Team1, csvMatch.Team2);
+                    _logger.LogInformation("Skipping duplicate match {Date}, {Team1}, {Team2}",
+                        matchDateUtc, csvMatch.Team1, csvMatch.Team2);
                     continue;
                 }
 
-                batch.Add(new Match
-                { 
+                bool exists = await _dbContexts.Matches
+                    .AnyAsync(m => m.Date == matchDateUtc &&
+                                   m.Team1 == csvMatch.Team1 &&
+                                   m.Team2 == csvMatch.Team2, token);
+                
+                if (exists)
+                {
+                    _logger.LogInformation("Skipping duplicate from DB {Date}, {Team1}, {Team2}",
+                        matchDateUtc, csvMatch.Team1, csvMatch.Team2);
+                    continue;
+                }
+
+                var match = new Match
+                {
                     Id = Guid.NewGuid(),
-                    Date = csvMatch.Date,
+                    Date = matchDateUtc,
                     Team1 = csvMatch.Team1,
                     Team2 = csvMatch.Team2,
                     Score = csvMatch.Score
-                });
+                };
+                
+                batch.Add(match);
+                existingMatches.Add((csvMatch.Date, csvMatch.Team1, csvMatch.Team2));
 
                 if (batch.Count >= batchSize)
                 {
-                    await db.InsertAllAsync(batch);
-                    _logger.LogInformation("Imported batch of {Count} matches", batch.Count);
+                    await _dbContexts.Matches.AddRangeAsync(batch, token);
+                    await _dbContexts.SaveChangesAsync(token);
                     batch.Clear();
                 }
             }
-
+            
             if (batch.Count > 0)
             {
-                await db.InsertAllAsync(batch);
-                _logger.LogInformation("Imported final batch of {Count} matches", batch.Count);
+                await _dbContexts.Matches.AddRangeAsync(batch, token);
+                await _dbContexts.SaveChangesAsync(token);
+                _logger.LogInformation("Imported last {MatchCount} matches", batch.Count);
             }
-
-            transaction.Commit();
-            _logger.LogInformation("CSV import completed successfully.");
+                
+            await transaction.CommitAsync(token);
+            _logger.LogInformation("Import of CSV file competed");
         }
         catch (Exception ex)
         {
-            transaction.Rollback();
-            _logger.LogError(ex, "Error during CSV import. Transaction rolled back.");
+            await transaction.RollbackAsync(token);
+            _logger.LogError(ex, "An error occured while importing from csv file.");
             throw;
         }
     }

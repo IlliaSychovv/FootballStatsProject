@@ -3,27 +3,25 @@ using CsvHelper;
 using FootballStats.Application.DTO.Match;
 using FootballStats.Application.Interfaces.Services;
 using FootballStats.Infrastructure.Data;
-using FootballStats.Domain.Entity;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ServiceStack.OrmLite;
-
+ 
 namespace FootballStats.Infrastructure.Services;
 
 public class ExportService : IExportService
 {
-    private readonly DbContext _context;
+    private readonly AppDbContext _dbContext;
     private readonly ILogger<ExportService> _logger;
 
-    public ExportService(DbContext context, ILogger<ExportService> logger)
+    public ExportService(AppDbContext dbContext, ILogger<ExportService> logger)
     {
-        _context = context;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
-    public async Task ExportToCsvAsync(Stream stream)
-    {
-        using var db = _context.Open();
+    public async Task ExportToCsvAsync(Stream stream, CancellationToken token = default)
+    { 
         await using var writer = new StreamWriter(stream, leaveOpen: true);
         await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         
@@ -33,30 +31,26 @@ public class ExportService : IExportService
         const int batchSize = 100;
         var batch = new List<MatchExportDto>(batchSize);
 
-        foreach (var match in db.SelectLazy<Match>())
+        await foreach (var match in _dbContext.Matches.AsNoTracking().AsAsyncEnumerable().WithCancellation(token))
         {
             batch.Add(match.Adapt<MatchExportDto>());
             
             if (batch.Count >= batchSize)
             {
-                WriteBatch(csv, batch);
+                await WriteBatch(csv, batch, token);
                 batch.Clear();
             }
         }
         
         if (batch.Count > 0)
-            WriteBatch(csv, batch);
+            await WriteBatch(csv, batch, token);
 
         await writer.FlushAsync();
         _logger.LogInformation("CSV export completed");
     }
     
-    private static void WriteBatch(CsvWriter csv, List<MatchExportDto> batch)
+    private static async Task WriteBatch(CsvWriter csv, List<MatchExportDto> batch, CancellationToken token = default)
     {
-        foreach (var dto in batch)
-        {
-            csv.WriteRecord(dto);
-            csv.NextRecord();
-        }
+        await csv.WriteRecordsAsync(batch, token);  
     }
 }

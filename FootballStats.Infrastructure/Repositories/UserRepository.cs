@@ -1,40 +1,40 @@
 using FootballStats.Application.Interfaces.Repositories;
 using FootballStats.Domain.Entity;
 using FootballStats.Infrastructure.Data;
-using ServiceStack.OrmLite;
+using Microsoft.EntityFrameworkCore;
 
 namespace FootballStats.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly DbContext _context;
-
-    public UserRepository(DbContext context)
+    private readonly AppDbContext _dbContext;
+    
+    public UserRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
     public async Task AddUserAsync(User user)
     {
-        using var db = _context.Open();
-        await db.InsertAsync(user);
+        await _dbContext.Users.AddAsync(user);
+        await _dbContext.SaveChangesAsync();
     }
     
-    public async Task<User> GetUserByLoginAsync(string email)
+    public async Task<User?> GetUserByLoginAsync(string email)
     {
-        using var db = _context.Open();
-        return await db.SingleAsync<User>(u => u.Email == email);
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<User> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        using var db = _context.Open();
-        return await db.SingleAsync<User>(u => u.Email == email);
+        return await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public async Task<bool> IsUserExistAsync(string email)
     {
-        using var db = _context.Open();
-        return await db.ExistsAsync<User>(u => u.Email == email);
+        return await _dbContext.Users
+            .AnyAsync(u => u.Email == email);
     }
 }

@@ -2,5 +2,5 @@ namespace FootballStats.Application.Interfaces.Services;
 
 public interface IImportService
 { 
-    Task ImportFromCsvAsync(Stream csvStream);
+    Task ImportFromCsvAsync(Stream csvStream, CancellationToken token = default);
 }
